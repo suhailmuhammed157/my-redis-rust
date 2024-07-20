@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, io::Error};
+use std::io::Error;
 
 use bytes::BytesMut;
 use my_redis::{helpers::buffer_to_array, storage::Storage, Command};
@@ -21,20 +21,24 @@ async fn main() -> Result<(), std::io::Error> {
 
         let mut buffer_data = BytesMut::with_capacity(1024);
         socket.read_buf(&mut buffer_data).await?;
+
         let data = buffer_data.to_ascii_lowercase();
+
         let commands = buffer_to_array(data);
 
         let requested_command = Command::get_command(&commands[0]);
 
+        let key = &commands[1];
+        let value = if commands.len() > 2 {
+            Some(&commands[2])
+        } else {
+            None
+        };
+
+        println!("{:?}", requested_command);
+
         println!("buffer {:?}", requested_command);
-        process_query(
-            &requested_command,
-            &mut storage,
-            &commands[1],
-            Some(&commands[2]),
-            &mut socket,
-        )
-        .await?;
+        process_query(&requested_command, &mut storage, key, value, &mut socket).await?;
     }
 
     Ok(())
