@@ -13,8 +13,12 @@ impl Storage {
     }
     pub fn add_new_entry(&mut self, key: &String, value: &String) -> Result<&str, Error> {
         let key_clone = key.clone();
-        let value_clone: String = value.clone();
-        &self.entries.insert(key_clone, value_clone);
-        Ok("OK")
+        let value_clone = value.clone();
+        let response = &self.entries.insert(key_clone, value_clone);
+        if let None = response {
+            Ok("OK")
+        } else {
+            Ok("r OK")
+        }
     }
 }
