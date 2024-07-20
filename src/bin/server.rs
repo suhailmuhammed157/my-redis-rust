@@ -48,7 +48,18 @@ async fn process_query(
     socket: &mut TcpStream,
 ) -> Result<(), Error> {
     match command {
-        Command::Get => Ok(()),
+        Command::Get => {
+            let resp = storage.read(key);
+            match resp {
+                Ok(val) => {
+                    socket.write_all(val.as_bytes()).await?;
+                }
+                Err(_err) => {
+                    socket.write_all(_err.as_bytes()).await?;
+                }
+            }
+            Ok(())
+        }
         Command::Set => {
             if let Some(val) = value {
                 let response: Result<&str, Error> = storage.add_new_entry(key, val);

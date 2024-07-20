@@ -21,4 +21,12 @@ impl Storage {
             Ok("r OK")
         }
     }
+    pub fn read(&mut self, key: &String) -> Result<&String, &str> {
+        let response = &self.entries.get(key);
+        if let Some(val) = response {
+            Ok(val)
+        } else {
+            Err("no such key found")
+        }
+    }
 }
